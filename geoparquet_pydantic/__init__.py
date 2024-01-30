@@ -1,4 +1,5 @@
-import shapely
+import shapely.wkb
+import shapely.wkt
 import pyarrow
 import pyarrow.parquet as parquet
 from geojson_pydantic.geometries import (
@@ -12,7 +13,7 @@ from geojson_pydantic.features import (
 
 def to_wkb(self: _GeometryBase) -> bytes:
     """Converts the GeoJSON object to WKB format."""
-    return shapely.wkb.dumps(self.model_dump())
+    return shapely.wkb.dumps(shapely.wkt.loads(self.wkt))
 
 _GeometryBase.wkb = property(to_wkb)
 

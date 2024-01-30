@@ -1,6 +1,7 @@
 import pytest
 import pathlib
 import json
+import geopandas as gpd
 from geojson_pydantic.geometries import (
     LineString,
     Point,
@@ -64,3 +65,8 @@ def test_to_geoparquet(
     out_path = _.to_geoparquet(feature_collection, path)
     assert str(path) == out_path
     assert pathlib.Path(path).exists()
+
+    df = gpd.read_parquet(path)
+    assert isinstance(df, gpd.GeoDataFrame)
+    assert len(df) == 1
+    assert df.geometry[0].wkt == feature_collection.features[0].geometry.wkt

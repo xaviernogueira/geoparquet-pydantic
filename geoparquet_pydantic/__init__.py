@@ -58,7 +58,7 @@ def to_geoparquet(
     )
 
     # update metadata
-    metadata = {
+    geo_metadata = {
         "version": version,
         "primary_column": "geometry",
         "columns": {
@@ -68,6 +68,7 @@ def to_geoparquet(
             },
         },
     }
+    metadata = {"geo": geo_metadata}
     table: pyarrow.Table = _update_metadata(table, metadata)
     parquet.write_table(table, path, **kwargs)
     return str(path)

@@ -62,7 +62,7 @@ def test_to_geoparquet(
     tmp_path: pathlib.Path,
 ) -> None:
     path = tmp_path / "test.parquet"
-    out_path = _.to_geoparquet(feature_collection, path)
+    out_path = feature_collection.to_geoparquet(path)
     assert str(path) == out_path
     assert pathlib.Path(path).exists()
 

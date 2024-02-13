@@ -1,5 +1,6 @@
+"""Pydantic models for GeoParquet metadata."""
 from pydantic import Field, BaseModel, field_validator, model_validator
-from typing import Annotated, Optional, Literal, Any, Union
+from typing import Annotated, Optional, Literal, Union
 from pyproj import CRS
 
 EdgeType = Literal["planar", "spherical"]

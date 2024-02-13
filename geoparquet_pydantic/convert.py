@@ -1,3 +1,4 @@
+"""Converts a GeoJSON Pydantic FeatureCollection to an Arrow table or GeoParquet."""
 import shapely.wkb
 import shapely.wkt
 import pyarrow
@@ -14,7 +15,7 @@ from pathlib import Path
 from typing import Optional
 
 
-def to_wkb(self: _GeometryBase) -> bytes:
+def _to_wkb(self: _GeometryBase) -> bytes:
     """Converts the GeoJSON object to WKB format."""
     return shapely.wkb.dumps(shapely.wkt.loads(self.wkt))
 
@@ -32,10 +33,8 @@ def _update_metadata(table: pyarrow.Table, metadata: dict) -> pyarrow.Table:
     return table.replace_schema_metadata(new_metadata)
 
 
-def to_geoparquet(
-    self: FeatureCollection,
-    path: str | Path,
-    version: Optional[str] = None,
+def geojson_to_arrow(
+    geojson: FeatureCollection,
     primary_column: Optional[str] = None,
     column_schema: Optional[pyarrow.Schema] = None,
     **kwargs,
@@ -71,10 +70,23 @@ def to_geoparquet(
     # write table
     table = pyarrow.Table.from_pydict(
         {
-            primary_column: [to_wkb(f.geometry) for f in self.features],
+            primary_column: [_to_wkb(f.geometry) for f in geojson.features],
         }
     )
 
+
+    """Converts a GeoJSON Pydantic FeatureCollection to an Arrow table.
+
+    Returns:
+        The Arrow table.
+    """
+    ...
+
+def geojson_to_geoparquet(
+    table: pyarrow.Table,
+    path: str | Path,
+    version: Optional[str] = None,
+) -> Path:
     # update metadata
     geo_metadata = {
         "version": version,
@@ -82,7 +94,7 @@ def to_geoparquet(
         "columns": {
             "geometry": {
                 "encoding": "WKB",
-                "geometry_types": _get_geom_types(self.features),
+                "geometry_types": _get_geom_types(geojson.features),
             },
         },
     }

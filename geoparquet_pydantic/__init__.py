@@ -1,6 +1,6 @@
 from .schemas import (
     GeoParquet,
-    ColumnMetadata,
+    GeoColumnMetadata,
 )
 from .to_arrow import (
     to_geoparquet,

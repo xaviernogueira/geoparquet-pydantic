@@ -1,8 +1,8 @@
 import pytest
 from pyproj import CRS
 from geoparquet_pydantic.schemas import (
-    GeoColumnMetadata,
-    GeoParquet,
+    GeometryColumnMetadata,
+    GeoParquetMetadata,
 )
 
 
@@ -20,7 +20,7 @@ def good_geo_column_metadata():
 
 
 def test_good_geo_column_metadata(good_geo_column_metadata):
-    metadata = GeoColumnMetadata(**good_geo_column_metadata)
+    metadata = GeometryColumnMetadata(**good_geo_column_metadata)
     assert metadata.encoding == good_geo_column_metadata["encoding"]
     assert metadata.geometry_types == good_geo_column_metadata["geometry_types"]
     assert metadata.crs != good_geo_column_metadata["crs"]
@@ -38,97 +38,97 @@ def test_bad_geo_column_metadata(good_geo_column_metadata):
     bad_encoding = good_geo_column_metadata.copy()
     bad_encoding["encoding"] = "WKT"
     with pytest.raises(ValueError):
-        GeoColumnMetadata(**bad_encoding)
+        GeometryColumnMetadata(**bad_encoding)
 
     # Test bad geometry types
     bad_geometry_types = good_geo_column_metadata.copy()
     bad_geometry_types["geometry_types"] = ["NOT_A_REAL_TIME"]
     with pytest.raises(ValueError):
-        GeoColumnMetadata(**bad_geometry_types)
+        GeometryColumnMetadata(**bad_geometry_types)
 
     # Test bad CRS
     bad_crs = good_geo_column_metadata.copy()
     bad_crs["crs"] = "NOT_A_REAL_CRS"
     with pytest.raises(ValueError):
-        GeoColumnMetadata(**bad_crs)
+        GeometryColumnMetadata(**bad_crs)
 
     # Test bad edges
     bad_edges = good_geo_column_metadata.copy()
     bad_edges["edges"] = "NOT_A_REAL_EDGE"
     with pytest.raises(ValueError):
-        GeoColumnMetadata(**bad_edges)
+        GeometryColumnMetadata(**bad_edges)
 
     # Test bad bbox
     bad_bbox = good_geo_column_metadata.copy()
     bad_bbox["bbox"] = [0, 0, 25]
     with pytest.raises(ValueError):
-        GeoColumnMetadata(**bad_bbox)
+        GeometryColumnMetadata(**bad_bbox)
 
     # Test bad epoch
     bad_epoch = good_geo_column_metadata.copy()
     bad_epoch["epoch"] = "NOT_A_REAL_EPOCH"
     with pytest.raises(ValueError):
-        GeoColumnMetadata(**bad_epoch)
+        GeometryColumnMetadata(**bad_epoch)
 
     # Test bad orientation
     bad_orientation = good_geo_column_metadata.copy()
     bad_orientation["orientation"] = "NOT_A_REAL_ORIENTATION"
     with pytest.raises(ValueError):
-        GeoColumnMetadata(**bad_orientation)
+        GeometryColumnMetadata(**bad_orientation)
 
 
 def test_good_geoparquet(good_geo_column_metadata):
 
     # minimum inputs
-    geo_parquet = GeoParquet(
-        columns={"geometry": GeoColumnMetadata(**good_geo_column_metadata)},
+    geo_parquet = GeoParquetMetadata(
+        columns={"geometry": GeometryColumnMetadata(**good_geo_column_metadata)},
     )
     assert geo_parquet.version == "1.1.0-dev"
     assert geo_parquet.primary_column == "geometry"
     assert isinstance(geo_parquet.columns, dict)
     assert len(geo_parquet.columns) == 1
     assert "geometry" in geo_parquet.columns
-    assert isinstance(geo_parquet.columns["geometry"], GeoColumnMetadata)
+    assert isinstance(geo_parquet.columns["geometry"], GeometryColumnMetadata)
 
     # maximum inputs
-    geo_parquet = GeoParquet(
+    geo_parquet = GeoParquetMetadata(
         version="1.0.0",
         primary_column="geom",
-        columns={"geom": GeoColumnMetadata(**good_geo_column_metadata)},
+        columns={"geom": GeometryColumnMetadata(**good_geo_column_metadata)},
     )
     assert geo_parquet.version == "1.0.0"
     assert geo_parquet.primary_column == "geom"
     assert isinstance(geo_parquet.columns, dict)
     assert len(geo_parquet.columns) == 1
     assert "geom" in geo_parquet.columns
-    assert isinstance(geo_parquet.columns["geom"], GeoColumnMetadata)
+    assert isinstance(geo_parquet.columns["geom"], GeometryColumnMetadata)
 
 
 def test_bad_geoparquet(good_geo_column_metadata):
 
     # Test bad version
     with pytest.raises(ValueError):
-        GeoParquet(
+        GeoParquetMetadata(
             version=1.431243,
-            columns={"geometry": GeoColumnMetadata(**good_geo_column_metadata)},
+            columns={"geometry": GeometryColumnMetadata(**good_geo_column_metadata)},
         )
 
     # Test bad primary_column
     with pytest.raises(ValueError):
-        GeoParquet(
+        GeoParquetMetadata(
             primary_column=1.431243,
-            columns={"geometry": GeoColumnMetadata(**good_geo_column_metadata)},
+            columns={"geometry": GeometryColumnMetadata(**good_geo_column_metadata)},
         )
 
     # Test bad columns
     with pytest.raises(ValueError):
-        GeoParquet(
+        GeoParquetMetadata(
             columns={"geometry": "NOT_A_REAL_METADATA"},
         )
 
     # Test missing primary_column
     with pytest.raises(ValueError):
-        GeoParquet(
+        GeoParquetMetadata(
             primary_column="NOT_A_REAL_COLUMN",
-            columns={"geometry": GeoColumnMetadata(**good_geo_column_metadata)},
+            columns={"geometry": GeometryColumnMetadata(**good_geo_column_metadata)},
         )

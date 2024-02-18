@@ -1,4 +1,12 @@
 from .schemas import (
-    GeoParquet,
-    GeoColumnMetadata,
+    GeometryColumnMetadata,
+    GeoParquetMetadata,
+)
+from .convert import (
+    geojson_to_geoparquet,
+    geoparquet_to_geojson,
+)
+from .validate import (
+    validate_geoparquet_table,
+    validate_geoparquet_file,
 )

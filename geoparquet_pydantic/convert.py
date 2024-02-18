@@ -12,8 +12,8 @@ from geojson_pydantic.features import (
     FeatureCollection,
 )
 from geoparquet_pydantic.schemas import (
-    GeoColumnMetadata,
-    GeoParquet,
+    GeometryColumnMetadata,
+    GeoParquetMetadata,
 )
 from pathlib import Path
 from typing import Optional, Iterable
@@ -28,11 +28,13 @@ def _get_geom_types(features: list[Feature]) -> list[str]:
     return list(set([feature.geometry.type for feature in features]))
 
 
-def _get_default_geo_metadata(feature_collection: FeatureCollection) -> GeoParquet:
-    return GeoParquet(
+def _get_default_geo_metadata(
+    feature_collection: FeatureCollection,
+) -> GeoParquetMetadata:
+    return GeoParquetMetadata(
         primary_column="geometry",
         columns={
-            "geometry": GeoColumnMetadata(
+            "geometry": GeometryColumnMetadata(
                 **{
                     "encoding": "WKB",
                     "geometry_types": _get_geom_types(feature_collection.features),
@@ -67,7 +69,7 @@ def geojson_to_geoparquet(
     geojson: FeatureCollection | Path,
     primary_column: Optional[str] = None,
     column_schema: Optional[pyarrow.Schema] = None,
-    geo_metadata: GeoParquet | dict | None = None,
+    geo_metadata: GeoParquetMetadata | dict | None = None,
     **kwargs,
 ) -> pyarrow.Table:
     """Converts a GeoJSON Pydantic FeatureCollection to an Arrow table with geoparquet metadata.
@@ -96,8 +98,8 @@ def geojson_to_geoparquet(
     if not geo_metadata:
         geo_metadata = _get_default_geo_metadata(geojson)
     if isinstance(geo_metadata, dict):
-        geo_metadata = GeoParquet(**geo_metadata)
-    if not isinstance(geo_metadata, GeoParquet):
+        geo_metadata = GeoParquetMetadata(**geo_metadata)
+    if not isinstance(geo_metadata, GeoParquetMetadata):
         raise ValueError("geo_metadata must be a valid GeoParquet class, dict, or None")
 
     # get other columns as iterables and update schema

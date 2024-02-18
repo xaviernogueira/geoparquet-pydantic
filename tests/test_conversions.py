@@ -6,6 +6,8 @@ import geojson_pydantic
 import geopandas as gpd
 import pyarrow.parquet
 from geojson_pydantic.features import FeatureCollection
+
+# TODO: add more tests to cover all units
 from geoparquet_pydantic.convert import (
     _to_wkb,
     _get_geom_types,

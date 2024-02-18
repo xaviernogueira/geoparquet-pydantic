@@ -6,7 +6,7 @@ from pyproj import CRS
 
 EdgeType = Literal["planar", "spherical"]
 
-GeometryTypes = Annotated[
+FlatGeometryTypes = Annotated[
     # TODO: support 3d geometries with Z suffix
     Literal[
         "Point",
@@ -33,10 +33,12 @@ ZGeometryTypes = Annotated[
     Field(description="3D geometry types supported by the column"),
 ]
 
+GeometryTypes = Union[FlatGeometryTypes, ZGeometryTypes]
 
-class GeoColumnMetadata(BaseModel):
+
+class GeometryColumnMetadata(BaseModel):
     encoding: Literal["WKB"]
-    geometry_types: list[GeometryTypes | ZGeometryTypes]
+    geometry_types: list[GeometryTypes]
 
     crs: Annotated[
         str,
@@ -87,7 +89,7 @@ class GeoColumnMetadata(BaseModel):
         return v
 
 
-class GeoParquet(BaseModel):
+class GeoParquetMetadata(BaseModel):
     version: Annotated[
         str, Field(description="The version of the GeoParquet format")
     ] = "1.1.0-dev"
@@ -95,12 +97,12 @@ class GeoParquet(BaseModel):
         str, Field(description="The name of the geometry primary column")
     ] = "geometry"
     columns: Annotated[
-        dict[str, GeoColumnMetadata],
+        dict[str, GeometryColumnMetadata],
         Field(description="Metadata for each column (keys)"),
     ]
 
     @model_validator(mode="after")
-    def contains_primary_col(self) -> "GeoParquet":
+    def contains_primary_col(self) -> "GeoParquetMetadata":
         if not self.primary_column in self.columns.keys():
             raise ValueError(
                 f"primary column={self.primary_column} not in arg:columns={self.columns}"

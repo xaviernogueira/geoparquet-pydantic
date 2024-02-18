@@ -1,4 +1,5 @@
 """Pydantic models for GeoParquet metadata."""
+
 from pydantic import Field, BaseModel, field_validator, model_validator
 from typing import Annotated, Optional, Literal, Union
 from pyproj import CRS
@@ -7,6 +8,15 @@ EdgeType = Literal["planar", "spherical"]
 
 GeometryTypes = Annotated[
     # TODO: support 3d geometries with Z suffix
+    Literal[
+        "Point",
+        "MultiPoint",
+        "LineString",
+        "MultiLineString",
+        "Polygon",
+        "MultiPolygon",
+        "GeometryCollection",
+    ],
     Literal[
         "Point",
         "MultiPoint",
@@ -25,7 +35,10 @@ class GeoColumnMetadata(BaseModel):
     geometry_types: list[GeometryTypes]
 
     crs: Annotated[
-        str, Field(description="The CRS of the geometry column in PROJJSON format")
+        str,
+        Field(
+            description="The CRS of the geometry column in a string format readable by pyproj. Is the converted to PROJJSON format"
+        ),
     ] = "OGC:CRS84"
 
     edges: Annotated[
@@ -60,12 +73,14 @@ class GeoColumnMetadata(BaseModel):
     def only_unique_types(cls, v):
         if len(v) != len(set(v)):
             raise ValueError("geometry_types items must be unique!")
+        return v
 
     @field_validator("bbox")
     @classmethod
     def must_be_length_4(cls, v):
         if v is not None and len(v) != 4:
             raise ValueError("bbox must be a list of 4 floats!")
+        return v
 
 
 class GeoParquet(BaseModel):

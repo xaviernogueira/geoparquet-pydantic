@@ -37,6 +37,7 @@ dev = [
     "black",
     "pyright",
     "pre-commit",
+    "geopandas",
 ]
 
 [tool.setuptools_scm]

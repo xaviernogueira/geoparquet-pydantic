@@ -57,18 +57,28 @@ def _validate_column_schema(
     column_schema: pyarrow.Schema,
     primary_column: str,
     geojson: FeatureCollection,
+    add_none_values: bool,
 ) -> None:
     names = [i for i in column_schema.names if i != primary_column]
     for feature in geojson.features:
-        assert all(
-            [feature.properties.get(name) for name in names]
-        ), f"Feature {feature} does not contain all the columns in the schema: {column_schema.names}"
+        if not add_none_values:
+            all_present = all([name in feature.properties.keys() for name in names])
+            if not all_present:
+                raise ValueError(
+                    f"Feature {feature} does not contain all the columns in the schema: {column_schema.names}",
+                )
+
+        else:
+            for name in names:
+                if not feature.properties.get(name):
+                    feature.properties[name] = None
 
 
 def geojson_to_geoparquet(
     geojson: FeatureCollection | Path,
     primary_column: Optional[str] = None,
     column_schema: Optional[pyarrow.Schema] = None,
+    add_none_values: Optional[bool] = False,
     geo_metadata: GeoParquetMetadata | dict | None = None,
     **kwargs,
 ) -> pyarrow.Table:
@@ -80,6 +90,8 @@ def geojson_to_geoparquet(
         geojson (FeatureCollection): The GeoJSON Pydantic FeatureCollection.
         primary_column (str, optional): The name of the primary column. Defaults to None.
         column_schema (pyarrow.Schema, optional): The Arrow schema for the table. Defaults to None.
+        add_none_values (bool, default=False): Whether to fill missing column values
+            specified in param:column_schema with 'None' (converts to pyarrow.null()).
         geo_metadata (GeoParquet | dict | None, optional): The GeoParquet metadata.
         **kwargs: Additional keyword arguments for the Arrow table writer.
 
@@ -125,7 +137,7 @@ def geojson_to_geoparquet(
         columns.append(map(lambda f: json.dumps(f.properties), geojson.features))
 
     else:
-        _validate_column_schema(column_schema, primary_column, geojson)
+        _validate_column_schema(column_schema, primary_column, geojson, add_none_values)
 
         for col in column_schema.names:
             columns.append(map(lambda f: f.properties.get(col), geojson.features))

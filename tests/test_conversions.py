@@ -8,6 +8,10 @@ import pyarrow.parquet
 from geojson_pydantic.features import FeatureCollection
 
 # TODO: add more tests to cover all units
+from geoparquet_pydantic.schemas import (
+    GeometryColumnMetadata,
+    GeoParquetMetadata,
+)
 from geoparquet_pydantic.convert import (
     _to_wkb,
     _get_geom_types,
@@ -18,6 +22,8 @@ from geoparquet_pydantic.convert import (
     geoparquet_to_geojson,
 )
 import shapely
+
+from geoparquet_pydantic.validate import validate_geoparquet_file
 
 
 @pytest.fixture
@@ -35,6 +41,19 @@ def geometry_type_examples(
     return geometry_types
 
 
+@pytest.fixture
+def mock_table() -> pyarrow.Table:
+    table_dict = {
+        "col1": [1, 2, 3],
+        "col2": [4, 5, 6],
+    }
+    metadata = {b"key": b"value"}
+    table = pyarrow.Table.from_pydict(table_dict, metadata=metadata)
+    assert isinstance(table, pyarrow.Table)
+    assert table.schema.metadata == metadata
+    return table
+
+
 def test_to_wkb(
     geometry_type_examples: dict[str, geojson_pydantic.geometries._GeometryBase]
 ):
@@ -45,6 +64,93 @@ def test_to_wkb(
         assert len(wkb) > 0
         back_in = shapely.wkb.loads(wkb)
         assert isinstance(back_in, getattr(shapely.geometry, k))
+
+
+def test_get_geom_types(
+    valid_geojson_obj: FeatureCollection,
+):
+    """Test the extraction of unique geometry types from a GeoJSON object."""
+    geom_types = _get_geom_types(valid_geojson_obj.features)
+    assert isinstance(geom_types, list)
+    assert len(geom_types) == 7
+    assert set(geom_types) == {
+        "Point",
+        "MultiPoint",
+        "LineString",
+        "MultiLineString",
+        "Polygon",
+        "MultiPolygon",
+        "GeometryCollection",
+    }
+
+
+def test_get_default_geo_metadata(
+    valid_geojson_obj: FeatureCollection,
+):
+    default_metadata = _get_default_geo_metadata(valid_geojson_obj)
+    assert isinstance(default_metadata, GeoParquetMetadata)
+    assert default_metadata.columns["geometry"].geometry_types == _get_geom_types(
+        valid_geojson_obj.features
+    )
+
+
+def test_update_metadata(
+    mock_table: pyarrow.Table,
+):
+    new_metadata = {"new_key": "new_value"}
+    new_table = _update_metadata(mock_table, new_metadata)
+    assert isinstance(new_table, pyarrow.Table)
+    assert b"new_key" in new_table.schema.metadata
+    assert b"key" in new_table.schema.metadata
+
+
+def test_validate_column_schema(
+    valid_geojson_obj: FeatureCollection,
+):
+    # make updated FeatureCollection properties
+    for i, feature in enumerate(valid_geojson_obj.features):
+        feature.properties["number"] = i
+    mock_schema = pyarrow.schema(
+        [
+            ("geometry", pyarrow.binary()),
+            ("name", pyarrow.string()),
+            ("number", pyarrow.int64()),
+        ]
+    )
+    # test with valid schema
+    _validate_column_schema(
+        mock_schema,
+        primary_column="geometry",
+        geojson=valid_geojson_obj,
+        add_none_values=False,
+    )
+    _validate_column_schema(
+        mock_schema,
+        primary_column="geometry",
+        geojson=valid_geojson_obj,
+        add_none_values=True,
+    )
+
+    # test with invalid schema
+    for i, feature in enumerate(valid_geojson_obj.features):
+        if i % 2 == 0:
+            feature.properties = {}
+            assert not feature.properties
+    with pytest.raises(ValueError):
+        _validate_column_schema(
+            mock_schema,
+            "geometry",
+            valid_geojson_obj,
+            False,
+        )
+
+    # now test that it can add Nones
+    _validate_column_schema(
+        mock_schema,
+        "geometry",
+        valid_geojson_obj,
+        True,
+    )
 
 
 def test_geojson_to_geoparquet(

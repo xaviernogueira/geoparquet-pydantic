@@ -23,10 +23,20 @@ dependencies = [
     "pyarrow",
     "shapely",
     "pyproj",
+    "click",
 ]
 dynamic = [
     "version",
     "readme",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "pyright",
+    "pre-commit",
 ]
 
 [tool.setuptools_scm]

@@ -1,6 +1,7 @@
 """Pydantic models for GeoParquet metadata."""
 
-from pydantic import Field, BaseModel, field_validator, model_validator
+import ast
+from pydantic import BeforeValidator, Field, BaseModel, field_validator, model_validator
 from typing import Annotated, Optional, Literal, Union
 from pyproj import CRS
 
@@ -97,7 +98,7 @@ class GeoParquetMetadata(BaseModel):
         str, Field(description="The name of the geometry primary column")
     ] = "geometry"
     columns: Annotated[
-        dict[str, GeometryColumnMetadata],
+        dict[str, GeometryColumnMetadata | dict | str],
         Field(description="Metadata for each column (keys)"),
     ]
 
@@ -107,4 +108,21 @@ class GeoParquetMetadata(BaseModel):
             raise ValueError(
                 f"primary column={self.primary_column} not in arg:columns={self.columns}"
             )
+        return self
+
+    @model_validator(mode="after")
+    def convert_geo_to_class(self) -> "GeoParquetMetadata":
+        if not isinstance(self.columns[self.primary_column], GeometryColumnMetadata):
+            if isinstance(self.columns[self.primary_column], str):
+                self.columns[self.primary_column] = ast.literal_eval(
+                    self.columns[self.primary_column]
+                )
+            if isinstance(self.columns[self.primary_column], dict):
+                self.columns[self.primary_column] = GeometryColumnMetadata(
+                    **self.columns[self.primary_column]
+                )
+            else:
+                raise ValueError(
+                    f"Invalid primary column metadata: {self.columns[self.primary_column]}"
+                )
         return self

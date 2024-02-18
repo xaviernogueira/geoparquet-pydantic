@@ -125,6 +125,14 @@ def test_bad_geoparquet(good_geo_column_metadata):
         GeoParquetMetadata(
             columns={"geometry": "NOT_A_REAL_METADATA"},
         )
+    with pytest.raises(ValueError):
+        GeoParquetMetadata(
+            columns="NOT_EVEN_A_DICT",
+        )
+    with pytest.raises(ValueError):
+        GeoParquetMetadata(
+            columns={"geometry": {"A_DICT": "BUT_NOT_VALID"}},
+        )
 
     # Test missing primary_column
     with pytest.raises(ValueError):

@@ -17,22 +17,26 @@ GeometryTypes = Annotated[
         "MultiPolygon",
         "GeometryCollection",
     ],
-    Literal[
-        "Point",
-        "MultiPoint",
-        "LineString",
-        "MultiLineString",
-        "Polygon",
-        "MultiPolygon",
-        "GeometryCollection",
-    ],
     Field(description="The geometry types supported by the column"),
+]
+
+ZGeometryTypes = Annotated[
+    Literal[
+        "PointZ",
+        "MultiPointZ",
+        "LineStringZ",
+        "MultiLineStringZ",
+        "PolygonZ",
+        "MultiPolygonZ",
+        "GeometryCollectionZ",
+    ],
+    Field(description="3D geometry types supported by the column"),
 ]
 
 
 class GeoColumnMetadata(BaseModel):
     encoding: Literal["WKB"]
-    geometry_types: list[GeometryTypes]
+    geometry_types: list[GeometryTypes | ZGeometryTypes]
 
     crs: Annotated[
         str,
@@ -56,7 +60,7 @@ class GeoColumnMetadata(BaseModel):
         ]
     ] = None
 
-    orientation: Literal["counterclockwise"]
+    orientation: Literal["counterclockwise"] = "counterclockwise"
 
     @field_validator("crs")
     @classmethod

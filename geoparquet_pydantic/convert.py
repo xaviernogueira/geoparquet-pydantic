@@ -4,7 +4,6 @@ import shapely.wkb
 import shapely.wkt
 import pyarrow
 import json
-import pyarrow.parquet as parquet
 from geojson_pydantic.geometries import (
     _GeometryBase,
 )
@@ -13,19 +12,34 @@ from geojson_pydantic.features import (
     FeatureCollection,
 )
 from geoparquet_pydantic.schemas import (
+    GeoColumnMetadata,
     GeoParquet,
 )
 from pathlib import Path
 from typing import Optional, Iterable
 
 
-def _to_wkb(self: _GeometryBase) -> bytes:
+def _to_wkb(geometry: _GeometryBase) -> bytes:
     """Converts the GeoJSON object to WKB format."""
-    return shapely.wkb.dumps(shapely.wkt.loads(self.wkt))
+    return shapely.wkb.dumps(shapely.wkt.loads(geometry.wkt))
 
 
 def _get_geom_types(features: list[Feature]) -> list[str]:
     return list(set([feature.geometry.type for feature in features]))
+
+
+def _get_default_geo_metadata(feature_collection: FeatureCollection) -> GeoParquet:
+    return GeoParquet(
+        primary_column="geometry",
+        columns={
+            "geometry": GeoColumnMetadata(
+                **{
+                    "encoding": "WKB",
+                    "geometry_types": _get_geom_types(feature_collection.features),
+                }
+            ),
+        },
+    )
 
 
 def _update_metadata(table: pyarrow.Table, metadata: dict) -> pyarrow.Table:
@@ -49,42 +63,57 @@ def _validate_column_schema(
         ), f"Feature {feature} does not contain all the columns in the schema: {column_schema.names}"
 
 
-def geojson_to_arrow(
-    geojson: FeatureCollection,
+def geojson_to_geoparquet(
+    geojson: FeatureCollection | Path,
     primary_column: Optional[str] = None,
     column_schema: Optional[pyarrow.Schema] = None,
+    geo_metadata: GeoParquet | dict | None = None,
     **kwargs,
 ) -> pyarrow.Table:
-    """Converts a GeoJSON Pydantic FeatureCollection to an Arrow table.
+    """Converts a GeoJSON Pydantic FeatureCollection to an Arrow table with geoparquet metadata.
+
+    To save to a file, simply use pyarrow.parquet.write_table() on the returned table.
 
     Args:
         geojson (FeatureCollection): The GeoJSON Pydantic FeatureCollection.
         primary_column (str, optional): The name of the primary column. Defaults to None.
         column_schema (pyarrow.Schema, optional): The Arrow schema for the table. Defaults to None.
+        geo_metadata (GeoParquet | dict | None, optional): The GeoParquet metadata.
         **kwargs: Additional keyword arguments for the Arrow table writer.
 
     Returns:
-        The Arrow table.
+        The Arrow table with GeoParquet metadata.
     """
-
+    if not isinstance(geojson, FeatureCollection):
+        geojson = FeatureCollection(**json.load(geojson.open("r")))
     if not primary_column:
         primary_column = "geometry"
 
     # get primary column as iterables
     columns: list[Iterable] = [map(lambda f: _to_wkb(f.geometry), geojson.features)]
 
+    # get geo metadata
+    if not geo_metadata:
+        geo_metadata = _get_default_geo_metadata(geojson)
+    if isinstance(geo_metadata, dict):
+        geo_metadata = GeoParquet(**geo_metadata)
+    if not isinstance(geo_metadata, GeoParquet):
+        raise ValueError("geo_metadata must be a valid GeoParquet class, dict, or None")
+
     # get other columns as iterables and update schema
     if not column_schema:
-        column_schema = pyarrow.Schema(
+        column_schema = pyarrow.schema(
             [
                 (primary_column, pyarrow.binary()),
                 ("properties", pyarrow.string()),
             ]
         )
-    else:
+    elif isinstance(column_schema, pyarrow.Schema):
         if primary_column in column_schema.names:
             column_schema.remove(column_schema.get_field_index(primary_column))
-        column_schema.inset(0, (primary_column, pyarrow.binary()))
+        column_schema.insert(0, pyarrow.field(primary_column, pyarrow.binary()))
+    else:
+        raise ValueError("column_schema must be a valid pyarrow.Schema or None")
 
     if "properties" in column_schema.names:
         if len(column_schema.names) > 2:
@@ -100,53 +129,23 @@ def geojson_to_arrow(
             columns.append(map(lambda f: f.properties.get(col), geojson.features))
 
     # write table
-    return pyarrow.Table.from_pydict(
+    table = pyarrow.Table.from_pydict(
         {**dict(zip(column_schema.names, columns))},
         schema=column_schema,
         **kwargs,
     )
+    return _update_metadata(table, {"geo": geo_metadata.model_dump()})
 
 
-def table_to_geoparquet(
-    table: pyarrow.Table,
-    path: str | Path,
-    geo_metadata: GeoParquet | dict | None = None,
-    primary_column: Optional[str] = None,
-    **kwargs,
-) -> Path:
-    """Converts an Arrow table to a GeoParquet file.
+def geoparquet_to_geojson(
+    arrow_table: pyarrow.Table,
+) -> FeatureCollection:
+    """Converts an Arrow table with GeoParquet metadata to a GeoJSON Pydantic FeatureCollection.
 
     Args:
-        table (pyarrow.Table): The Arrow table
-        path (str | Path): The path to the GeoParquet file.
-        geo_metadata (GeoParquet | dict | None, optional): The GeoParquet metadata.
-           This can be either a validated GeoParquet class, or a dict to validate. Defaults to None.
-        **kwargs: Additional keyword arguments for the Arrow parquet writer.
+        arrow_table (pyarrow.Table): The Arrow table with GeoParquet metadata.
 
     Returns:
-        Path: The path to the GeoParquet file.
+        FeatureCollection: The GeoJSON Pydantic FeatureCollection.
     """
-    if not primary_column:
-        primary_column = "geometry"
-    if not geo_metadata:
-        geo_metdata = {
-            "primary_column": "geometry",
-            "columns": {
-                "geometry": {
-                    "encoding": "WKB",
-                    "geometry_types": _get_geom_types(
-                        table.column(primary_column).to_pylist()
-                    ),
-                },
-            },
-        }
-    if isinstance(geo_metadata, dict):
-        geo_metadata = GeoParquet(**geo_metadata)
-    if not isinstance(geo_metadata, GeoParquet):
-        raise ValueError("geo_metadata must be a valid GeoParquet class, dict, or None")
-
-    table: pyarrow.Table = _update_metadata(
-        table,
-        {"geo": geo_metadata.model_dump()},
-    )
-    parquet.write_table(table, path, **kwargs)
+    raise NotImplementedError("This function is not yet implemented.")

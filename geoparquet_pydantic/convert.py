@@ -1,5 +1,6 @@
 import ast
 import functools
+import warnings
 import geojson_pydantic
 from geojson_pydantic.types import BBox
 import shapely.wkb
@@ -155,6 +156,9 @@ def geojson_to_geoparquet(
 
 
 def _find_bbox(geoparquet: pyarrow.Table) -> BBox | None:
+    if not geoparquet.schema.metadata:
+        warnings.warn("No GeoParquet metadata found in the Arrow table.")
+        return None
     decoded_metadata: dict[str, Any] = ast.literal_eval(
         geoparquet.schema.metadata[b"geo"].decode("utf-8"),
     )
@@ -185,14 +189,17 @@ def _shapely_to_feature(
 def geoparquet_to_geojson(
     geoparquet: pyarrow.Table | str | Path,
     primary_column: Optional[str] = None,
-    max_chunksize: Optional[int] = 1000,
+    max_chunksize: Optional[int] = None,
+    max_workers: Optional[int] = None,
 ) -> FeatureCollection:
     """Converts an Arrow table with GeoParquet metadata to a GeoJSON Pydantic FeatureCollection.
 
     Args:
         geoparquet (pyarrow.Table): Either an Arrow.Table or parquet with GeoParquet metadata.
-        primary_column (str, optional): The name of the primary column. Defaults to None.
+        primary_column (str, optional): The name of the primary column. Defaults to 'geometry'.
         max_chunksize (int, optional): The maximum chunksize to read from the parquet file. Defaults to 1000.
+        max_workers (int, optional): The maximum number of workers to use for parallel processing.
+            Defaults to 0 (runs sequentially). Use -1 for all available cores.
     Returns:
         FeatureCollection: The GeoJSON Pydantic FeatureCollection.
     """
@@ -214,6 +221,9 @@ def geoparquet_to_geojson(
     bbox: BBox | None = _find_bbox(geoparquet)
 
     # TODO: parallelize this (optionally)
+    if max_workers:
+        raise NotImplementedError("Parallel processing not yet implemented.")
+
     feature_lists: list[list[Feature]] = []
     for chunk in geoparquet.to_batches(max_chunksize):
         chunk_dict = chunk.to_pydict()
@@ -226,12 +236,19 @@ def geoparquet_to_geojson(
             lambda i: [p[i] for p in properties],
             range(len(geoms)),
         )
+        try:
+            chunk_features: Iterable[Feature] = list(
+                map(
+                    lambda gp: _shapely_to_feature(shapely.from_wkb(gp[0]), gp[1]),
+                    zip(geoms, feature_props),
+                )
+            )
+        except shapely.errors.GEOSException as e:
+            raise ValueError(
+                f"Error converting WKB to shapely geometry. Make sure the WKB is valid! Exception: {e}"
+            )
 
-        chunk_features: Iterable[Feature] = map(
-            lambda gp: _shapely_to_feature(shapely.from_wkb(gp[0]), gp[1]),
-            zip(geoms, feature_props),
-        )
-        feature_lists.append(list(chunk_features))
+        feature_lists.append(chunk_features)
     features: list[Feature] = list(functools.reduce(lambda a, b: a + b, feature_lists))
 
     return FeatureCollection(

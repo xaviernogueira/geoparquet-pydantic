@@ -243,6 +243,7 @@ def test_valid_geoparquet_to_geojson(
     valid_geoparquet_file: Path,
 ):
     """Test the conversion of a valid GeoParquet file to a valid GeoJSON object."""
+    # test defaults
     geojson = geoparquet_to_geojson(valid_geoparquet_file)
     assert isinstance(geojson, FeatureCollection)
     assert len(geojson.features) == 7
@@ -254,3 +255,32 @@ def test_valid_geoparquet_to_geojson(
         assert isinstance(feature.properties, dict)
         assert isinstance(feature.bbox, tuple)
         assert len(feature.bbox) == 4
+
+    # test with max_chunk_size = 1
+    geojson = geoparquet_to_geojson(valid_geoparquet_file, max_chunksize=1)
+    assert isinstance(geojson, FeatureCollection)
+    assert len(geojson.features) == 7
+    for feature in geojson.features:
+        assert isinstance(feature, geojson_pydantic.features.Feature)
+        assert isinstance(
+            feature.geometry, geojson_pydantic.geometries._GeometryBase
+        ) or isinstance(feature.geometry, geojson_pydantic.base._GeoJsonBase)
+        assert isinstance(feature.properties, dict)
+        assert isinstance(feature.bbox, tuple)
+        assert len(feature.bbox) == 4
+
+
+def test_bad_geoparquet_to_geojson():
+    # first we start with a table missing geo
+    table = pyarrow.Table.from_pydict(
+        {
+            "geometry": [b"NOT_VALID_GEOMETRY"],
+            "properties": ["{}"],
+        }
+    )
+    parquet_path = Path("test.parquet")
+    pyarrow.parquet.write_table(table, parquet_path)
+    assert parquet_path.exists()
+    with pytest.raises(ValueError):
+        geoparquet_to_geojson(parquet_path)
+    parquet_path.unlink()

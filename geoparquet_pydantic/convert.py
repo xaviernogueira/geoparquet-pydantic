@@ -1,5 +1,7 @@
-"""Converts a GeoJSON Pydantic FeatureCollection to an Arrow table or GeoParquet."""
-
+import ast
+import functools
+import geojson_pydantic
+from geojson_pydantic.types import BBox
 import shapely.wkb
 import shapely.wkt
 import pyarrow
@@ -14,9 +16,10 @@ from geojson_pydantic.features import (
 from geoparquet_pydantic.schemas import (
     GeometryColumnMetadata,
     GeoParquetMetadata,
+    GeometryTypes,
 )
 from pathlib import Path
-from typing import Optional, Iterable
+from typing import Any, Optional, Iterable
 
 
 def _to_wkb(geometry: _GeometryBase) -> bytes:
@@ -151,15 +154,88 @@ def geojson_to_geoparquet(
     return _update_metadata(table, {"geo": geo_metadata.model_dump()})
 
 
+def _find_bbox(geoparquet: pyarrow.Table) -> BBox | None:
+    decoded_metadata: dict[str, Any] = ast.literal_eval(
+        geoparquet.schema.metadata[b"geo"].decode("utf-8"),
+    )
+    bbox = decoded_metadata["columns"]["geometry"].get("bbox", None)
+    if isinstance(bbox, list):
+        bbox = tuple(bbox)
+    return bbox
+
+
+def _get_prop_records(name_value_tuple: tuple[str, list[Any]]) -> list[tuple[str, Any]]:
+    name, values = name_value_tuple
+    return list(zip([name] * len(values), values))
+
+
+def _shapely_to_feature(
+    geometry: shapely.geometry.base.BaseGeometry,
+    properties: list[tuple[str, Any]],
+) -> Feature:
+    geom_class: type[GeometryTypes] = getattr(geojson_pydantic, type(geometry).__name__)
+    return Feature(
+        type="Feature",
+        geometry=geom_class(**json.loads(shapely.to_geojson(geometry))),
+        bbox=list(geometry.bounds),
+        properties=dict([*properties]),
+    )
+
+
 def geoparquet_to_geojson(
-    arrow_table: pyarrow.Table,
+    geoparquet: pyarrow.Table | str | Path,
+    primary_column: Optional[str] = None,
+    max_chunksize: Optional[int] = 1000,
 ) -> FeatureCollection:
     """Converts an Arrow table with GeoParquet metadata to a GeoJSON Pydantic FeatureCollection.
 
     Args:
-        arrow_table (pyarrow.Table): The Arrow table with GeoParquet metadata.
-
+        geoparquet (pyarrow.Table): Either an Arrow.Table or parquet with GeoParquet metadata.
+        primary_column (str, optional): The name of the primary column. Defaults to None.
+        max_chunksize (int, optional): The maximum chunksize to read from the parquet file. Defaults to 1000.
     Returns:
         FeatureCollection: The GeoJSON Pydantic FeatureCollection.
     """
-    raise NotImplementedError("This function is not yet implemented.")
+    if not primary_column:
+        primary_column = "geometry"
+    if not max_chunksize:
+        max_chunksize = 1000
+    if isinstance(geoparquet, (str, Path)):
+        geoparquet = pyarrow.parquet.read_table(geoparquet)
+    if not isinstance(geoparquet, pyarrow.Table):
+        raise ValueError(
+            "param:geoparquet must be a valid pyarrow.Table or parquet file"
+        )
+
+    if primary_column not in geoparquet.column_names:
+        raise ValueError(f"Primary column {primary_column} not found in the table.")
+
+    # attempt to get the bbox from metadata
+    bbox: BBox | None = _find_bbox(geoparquet)
+
+    # TODO: parallelize this (optionally)
+    feature_lists: list[list[Feature]] = []
+    for chunk in geoparquet.to_batches(max_chunksize):
+        chunk_dict = chunk.to_pydict()
+        geoms: list[bytes] = chunk_dict.pop(primary_column)
+        properties: Iterable[list[tuple[str, Any]]] = map(
+            _get_prop_records,
+            chunk_dict.items(),
+        )
+        feature_props: Iterable[list[tuple[str, Any]]] = map(
+            lambda i: [p[i] for p in properties],
+            range(len(geoms)),
+        )
+
+        chunk_features: Iterable[Feature] = map(
+            lambda gp: _shapely_to_feature(shapely.from_wkb(gp[0]), gp[1]),
+            zip(geoms, feature_props),
+        )
+        feature_lists.append(list(chunk_features))
+    features: list[Feature] = list(functools.reduce(lambda a, b: a + b, feature_lists))
+
+    return FeatureCollection(
+        type="FeatureCollection",
+        features=features,
+        bbox=bbox,
+    )

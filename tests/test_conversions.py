@@ -7,9 +7,7 @@ import geopandas as gpd
 import pyarrow.parquet
 from geojson_pydantic.features import FeatureCollection
 
-# TODO: add more tests to cover all units
 from geoparquet_pydantic.schemas import (
-    GeometryColumnMetadata,
     GeoParquetMetadata,
 )
 from geoparquet_pydantic.convert import (
@@ -239,3 +237,20 @@ def test_bad_geojson_to_geoparquet(
                 ]
             ),
         )
+
+
+def test_valid_geoparquet_to_geojson(
+    valid_geoparquet_file: Path,
+):
+    """Test the conversion of a valid GeoParquet file to a valid GeoJSON object."""
+    geojson = geoparquet_to_geojson(valid_geoparquet_file)
+    assert isinstance(geojson, FeatureCollection)
+    assert len(geojson.features) == 7
+    for feature in geojson.features:
+        assert isinstance(feature, geojson_pydantic.features.Feature)
+        assert isinstance(
+            feature.geometry, geojson_pydantic.geometries._GeometryBase
+        ) or isinstance(feature.geometry, geojson_pydantic.base._GeoJsonBase)
+        assert isinstance(feature.properties, dict)
+        assert isinstance(feature.bbox, tuple)
+        assert len(feature.bbox) == 4

@@ -7,10 +7,10 @@ why must Python users install the *massive* GDAL dependency (typically via GeoPa
 In the age of cloud-native tech, size limits on popular services such as AWS Lambda make large dependencies more 
 
 **Is this library the right choice for you?:**
-* Do you want to use a wide variety of Geospatial functions? If so, you will likely have to add GDAL as a dependency anyways, 
-and this libraries conversion *probably* won't be all that useful.
+* Do you need to use a wide variety of Geospatial functions? If so, you will likely have to add GDAL/GeoPandas as a dependency anyways, 
+making this ibrary's conversion functions *probably* redundant.
 * Is your workflow command line centric? If so you may want to consider Planet Lab's simular CLI tool [`gpq`](https://github.com/planetlabs/gpq), 
-which is written in Go and substantially faster than our CLI.
+which is written in Go and substantially faster than our CLI tool.
 * Otherwise, if you are using Python and want to avoid unnecessary bulky dependencies, this library will be a great choice!
 
 # Installation
@@ -19,7 +19,7 @@ which is written in Go and substantially faster than our CLI.
 pip install geoparquet-pydantic
 ```
 
-And import with an underscore.
+And then import with an underscore:
 ```python
 import geoparquet_pydantic
 ```
@@ -68,4 +68,10 @@ geoparquet_pydantic --help
 ```
 
 We recomend adding an alias to avoid having to write the verbose project name over and over again.
+
+# Contribute
+
+We encourage contributions, feature requests, and bug reports!
+
+Use `dev-requirements.txt` to install our development dependencies, and be sure to use `pre-commit run --all-file` before commiting your work. If you add a new feature, we request that you add test coverage for it. Happy coding.
 

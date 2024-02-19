@@ -284,3 +284,9 @@ def test_bad_geoparquet_to_geojson():
     with pytest.raises(ValueError):
         geoparquet_to_geojson(parquet_path)
     parquet_path.unlink()
+
+    # now we test bad inputs
+    with pytest.raises(ValueError):
+        geoparquet_to_geojson(-999)
+    with pytest.raises(ValueError):
+        geoparquet_to_geojson(table, primary_column="NOT_VALID_COLUMN")

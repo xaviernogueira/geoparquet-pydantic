@@ -30,16 +30,6 @@ dynamic = [
     "readme",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "pytest-cov",
-    "black",
-    "pyright",
-    "pre-commit",
-    "geopandas",
-]
-
 [tool.setuptools_scm]
 
 [tool.setuptools.dynamic]

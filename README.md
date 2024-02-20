@@ -2,7 +2,7 @@
 
 
 <p align="center">
-  <img src="https://github.com/developmentseed/geojson-pydantic/imgs/repo_logo.png" alt="Logo">
+  <img src="https://github.com/developmentseed/geojson-pydantic/blob/main/imgs/repo_logo.png" alt="Logo">
 </p>
 
 </p>

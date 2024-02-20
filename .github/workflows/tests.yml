@@ -23,9 +23,13 @@ jobs:
           command: pip install -U pip # updade pip
 
       - name: Install dev dependencies
-        run: >
-          pip install -r dev-requirements.txt |
-          pip install -e . |
+        run: |
+          pip install -r dev-requirements.txt
+          pip list
+
+      - name: Install the library
+        run: |
+          pip install -e .
           pip list
 
       - name: Run tests

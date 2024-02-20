@@ -68,7 +68,7 @@ class GeometryColumnMetadata(BaseModel):
     @field_validator("crs")
     @classmethod
     def convert_crs_to_projjson(cls, v) -> str:
-        """Parse a CRS string and return a PROJJSON string"""
+        """Parse a CRS string and return a PROJJSON string."""
         try:
             crs = CRS.from_string(v)
             return crs.to_json()

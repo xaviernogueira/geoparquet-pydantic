@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "geoparquet-pydantic"
+name = "geoparquet_pydantic"
 description = "Read/write geoparquet with the geojson-pydanic models"
 requires-python = ">=3.11"
 keywords = [

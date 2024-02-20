@@ -52,7 +52,7 @@ def validate_geoparquet_file(
     primary_column: Optional[str] = None,
     read_file_kwargs: Optional[dict] = None,
 ) -> bool:
-    """Validates that a parquet file has correct GeoParquet metadata.
+    """Validates that a parquet file has correct GeoParquet metadata without opening it.
 
     See: https://github.com/opengeospatial/geoparquet/blob/main/format-specs/geoparquet.md
 

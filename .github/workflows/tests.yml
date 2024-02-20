@@ -19,7 +19,7 @@ jobs:
       - name: Install Python
         uses: gabrielfalcao/pyenv-action@v18
         with:
-          default: ${{ matrix.python }}
+          default: "${{ matrix.python-version }}"
           command: |
             pip install -U pip
             python --version

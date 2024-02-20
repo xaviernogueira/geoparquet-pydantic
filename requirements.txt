@@ -1,0 +1,6 @@
+geojson-pydantic
+pyarrow
+shapely
+pyproj
+click
+

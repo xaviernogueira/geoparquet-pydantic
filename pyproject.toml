@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geoparquet_pydantic"
-description = "Read/write geoparquet with the geojson-pydanic models"
+description = "Read/write geoparquet with the geojson-pydanic models."
 requires-python = ">=3.11"
 keywords = [
     "geoparquet",
@@ -34,4 +34,5 @@ dynamic = [
 include = ["tabular_ml*"]
 
 [tool.setuptools.dynamic]
+version = {attr = "geoparquet_pydantic.__version__"}
 readme = {file = "README.md"}

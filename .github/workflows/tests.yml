@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup pyenv
+      - name: Install Python
         uses: gabrielfalcao/pyenv-action@v18
         with:
           default: "${{ matrix.python }}"
@@ -29,7 +29,6 @@ jobs:
           pip list
 
       - name: Run tests
-        shell: bash -l {0}
         run: pytest --cov=geoparquet_pydantic --cov-report=xml tests/
 
       - name: Upload coverage report to CodeCov

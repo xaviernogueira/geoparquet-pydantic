@@ -20,7 +20,9 @@ jobs:
         uses: gabrielfalcao/pyenv-action@v18
         with:
           default: "${{ matrix.python }}"
-          command: pip install -U pip # updade pip
+          command: |
+            pip install -U pip
+            python --version
 
       - name: Install dependencies
         run: |

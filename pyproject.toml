@@ -31,7 +31,7 @@ dynamic = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["tabular_ml*"]
+include = ["geoparquet_pydantic*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "geoparquet_pydantic.__version__"}

@@ -1,0 +1,24 @@
+repos:
+# - repo: https://github.com/RobertCraigie/pyright-python
+#   rev: v1.1.351
+#   hooks:
+#   - id: pyright
+#     exclude: ^tests/.*
+#     additional_dependencies: [pyarrow, shapely, geojson-pydantic]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-ast
+      - id: check-case-conflict
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: check-docstring-first
+      - id: check-added-large-files
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 24.2.0
+    hooks:
+      - id: black
+        language_version: python3.12

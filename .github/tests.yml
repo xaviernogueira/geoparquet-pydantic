@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  pull_requests:
+
+jobs:
+  run:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup pyenv
+        uses: gabrielfalcao/pyenv-action@v18
+        with:
+          default: "${{ matrix.python }}"
+          command: pip install -U pip # updade pip
+
+      - name: Install dev dependencies
+        run: >
+          pyenv virtualenv dev_env
+          pyenv activate dev_env
+          pip install -e . |
+          pip install dev-requirements.txt |
+          pip list
+
+      - name: Run tests
+        shell: bash -l {0}
+        run: >
+          pyenv activate dev_env
+          && pytest --cov=geoparquet_pydantic --cov-report=xml tests/
+
+      - name: Upload coverage report to CodeCov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

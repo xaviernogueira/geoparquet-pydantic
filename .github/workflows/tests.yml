@@ -30,9 +30,7 @@ jobs:
 
       - name: Run tests
         shell: bash -l {0}
-        run: >
-          pyenv activate dev_env
-          && pytest --cov=geoparquet_pydantic --cov-report=xml tests/
+        run: pytest --cov=geoparquet_pydantic --cov-report=xml tests/
 
       - name: Upload coverage report to CodeCov
         uses: codecov/codecov-action@v3

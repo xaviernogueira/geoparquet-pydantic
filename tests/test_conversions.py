@@ -154,7 +154,8 @@ def test_validate_column_schema(
 def test_geojson_to_geoparquet(
     valid_geojson_obj: FeatureCollection,
 ):
-    """Test the conversion of a valid GeoJSON file and pydantic object to a valid GeoParquet table."""
+    """Test the conversion of a valid GeoJSON file and pydantic object to a valid
+    GeoParquet table."""
 
     # convert the GeoJSON object to a GeoParquet table with minimal optional
     table = geojson_to_geoparquet(valid_geojson_obj)

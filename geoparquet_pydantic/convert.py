@@ -86,7 +86,8 @@ def geojson_to_geoparquet(
     geo_metadata: GeoParquetMetadata | dict | None = None,
     **kwargs,
 ) -> pyarrow.Table:
-    """Converts a GeoJSON Pydantic FeatureCollection to an Arrow table with geoparquet metadata.
+    """Converts a GeoJSON Pydantic FeatureCollection to an Arrow table with geoparquet
+    metadata.
 
     To save to a file, simply use pyarrow.parquet.write_table() on the returned table.
 
@@ -192,7 +193,8 @@ def geoparquet_to_geojson(
     max_chunksize: Optional[int] = None,
     max_workers: Optional[int] = None,
 ) -> FeatureCollection:
-    """Converts an Arrow table with GeoParquet metadata to a GeoJSON Pydantic FeatureCollection.
+    """Converts an Arrow table with GeoParquet metadata to a GeoJSON Pydantic
+    FeatureCollection.
 
     Args:
         geoparquet (pyarrow.Table): Either an Arrow.Table or parquet with GeoParquet metadata.

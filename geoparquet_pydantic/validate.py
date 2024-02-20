@@ -5,7 +5,6 @@ Note that validating GeoParquet metadata can be handles with the
 """
 
 import ast
-import warnings
 import pyarrow
 from geoparquet_pydantic.schemas import (
     GeoParquetMetadata,
@@ -42,7 +41,6 @@ def validate_geoparquet_table(
 
     Returns:
         bool: True if the metadata is valid, False otherwise.
-
     """
     if not primary_column:
         primary_column = "geometry"

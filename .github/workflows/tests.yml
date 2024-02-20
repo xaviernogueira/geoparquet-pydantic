@@ -24,8 +24,8 @@ jobs:
 
       - name: Install dev dependencies
         run: >
-          pip install -e . |
           pip install -r dev-requirements.txt |
+          pip install -e . |
           pip list
 
       - name: Run tests

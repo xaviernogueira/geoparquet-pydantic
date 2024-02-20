@@ -24,8 +24,6 @@ jobs:
 
       - name: Install dev dependencies
         run: >
-          pyenv virtualenv dev_env
-          pyenv activate dev_env
           pip install -e . |
           pip install dev-requirements.txt |
           pip list

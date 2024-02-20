@@ -66,7 +66,7 @@ def validate_geoparquet_table(
 ) -> bool:
   """Validates a the GeoParquet metadata of a pyarrow.Table.
 
-    Args: 
+    Args:
         table (pyarrow.Table): The table to validate.
         primary_column (Optional[str], optional): The name of the primary geometry column.
             Defaults to None.
@@ -188,7 +188,7 @@ from geoparquet_pydantic import (
 
 # Contribute
 
-We encourage contributions, feature requests, and bug reports! 
+We encourage contributions, feature requests, and bug reports!
 
 Here is our recomended workflow:
 

@@ -1,5 +1,11 @@
 # GeoParquet-Pydantic 
 
+
+<p align="center">
+  <img src="https://github.com/developmentseed/geojson-pydantic/imgs/repo_logo.png" alt="Logo">
+</p>
+
+</p>
 <p align="center">
   <em> <a href="https://docs.pydantic.dev/latest/" target=A lightweight, <"_blank">`Pydantic`</a> centric library for validating GeoParquet files and converting between GeoJSON and GeoParquet...without GDAL!</em>
 </p>

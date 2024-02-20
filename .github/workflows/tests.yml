@@ -2,6 +2,8 @@ name: tests
 
 on:
   pull_requests:
+    branches:
+      - main
 
 jobs:
   run:

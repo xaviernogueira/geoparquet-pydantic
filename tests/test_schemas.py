@@ -32,7 +32,7 @@ def test_good_geo_column_metadata(good_geo_column_metadata):
 
 
 def test_bad_geo_column_metadata(good_geo_column_metadata):
-    """Test that the GeoColumnMetadata raises an error when given bad data"""
+    """Test that the GeoColumnMetadata raises an error when given bad data."""
 
     # Test bad encoding
     bad_encoding = good_geo_column_metadata.copy()

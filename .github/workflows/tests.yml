@@ -29,7 +29,7 @@ jobs:
 
       - name: Install the library
         run: |
-          pip install -e .
+          pip install .
           pip list
 
       - name: Run tests

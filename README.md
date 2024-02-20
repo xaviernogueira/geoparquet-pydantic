@@ -1,4 +1,4 @@
-# GeoParquet-Pydantic 
+# GeoParquet-Pydantic
 
 
 <p align="center">

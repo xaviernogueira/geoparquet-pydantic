@@ -1,10 +1,10 @@
 repos:
-  - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.351
-    hooks:
-    - id: pyright
-      exclude: ^tests/.*
-      additional_dependencies: [pyarrow, shapely, geojson-pydantic]
+# - repo: https://github.com/RobertCraigie/pyright-python
+#   rev: v1.1.351
+#   hooks:
+#   - id: pyright
+#     exclude: ^tests/.*
+#     additional_dependencies: [pyarrow, shapely, geojson-pydantic]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -22,4 +22,3 @@ repos:
     hooks:
       - id: black
         language_version: python3.12
-

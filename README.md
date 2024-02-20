@@ -1,15 +1,15 @@
 # geoparquet-pydantic
 
-A lightweight, `pydantic` centric library for validating GeoParquet files and converting between GeoJSON and GeoParquet...without GDAL! 
+A lightweight, `pydantic` centric library for validating GeoParquet files and converting between GeoJSON and GeoParquet...without GDAL!
 
-**Motivation:** This project started at the 2024 San Fransisco GeoParquet Community hackathon, and arose out of a simple observation: 
-why must Python users install the *massive* GDAL dependency (typically via GeoPandas) to do simple GeoJSON<>GeoParquet conversions. 
-In the age of cloud-native tech, size limits on popular services such as AWS Lambda make large dependencies more 
+**Motivation:** This project started at the 2024 San Fransisco GeoParquet Community hackathon, and arose out of a simple observation:
+why must Python users install the *massive* GDAL dependency (typically via GeoPandas) to do simple GeoJSON<>GeoParquet conversions.
+In the age of cloud-native tech, size limits on popular services such as AWS Lambda make large dependencies more
 
 **Is this library the right choice for you?:**
-* Do you need to use a wide variety of Geospatial functions? If so, you will likely have to add GDAL/GeoPandas as a dependency anyways, 
+* Do you need to use a wide variety of Geospatial functions? If so, you will likely have to add GDAL/GeoPandas as a dependency anyways,
 making this ibrary's conversion functions *probably* redundant.
-* Is your workflow command line centric? If so you may want to consider Planet Lab's simular CLI tool [`gpq`](https://github.com/planetlabs/gpq), 
+* Is your workflow command line centric? If so you may want to consider Planet Lab's simular CLI tool [`gpq`](https://github.com/planetlabs/gpq),
 which is written in Go and substantially faster than our CLI tool.
 * Otherwise, if you are using Python and want to avoid unnecessary bulky dependencies, this library will be a great choice!
 
@@ -46,7 +46,7 @@ Converts a GeoJSON feature collection (validated by `geojson_pydantic.features.F
 ## Validation functions
 
 ### `geoparquet_pydantic.validate_geoparquet_table`
-A convenience function that simply uses `GeoParquetMetadata` to validate the metadata in a `pyarrow.Table`, 
+A convenience function that simply uses `GeoParquetMetadata` to validate the metadata in a `pyarrow.Table`,
 and verifies that the expected geometry/primary column is present.
 
 ### `geoparquet_pydantic.validate_geoparquet_file`
@@ -74,4 +74,3 @@ We recomend adding an alias to avoid having to write the verbose project name ov
 We encourage contributions, feature requests, and bug reports!
 
 Use `dev-requirements.txt` to install our development dependencies, and be sure to use `pre-commit run --all-file` before commiting your work. If you add a new feature, we request that you add test coverage for it. Happy coding.
-

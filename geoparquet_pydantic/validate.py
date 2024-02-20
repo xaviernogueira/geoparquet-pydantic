@@ -1,6 +1,6 @@
 """For validating an existing GeoParquet file or Arrow table.
 
-Note that validating GeoParquet metadata can be handles with the 
+Note that validating GeoParquet metadata can be handles with the
 `.schemas` module pydantic classes.
 """
 

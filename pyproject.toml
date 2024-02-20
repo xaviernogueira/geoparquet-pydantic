@@ -30,7 +30,8 @@ dynamic = [
     "readme",
 ]
 
-[tool.setuptools_scm]
+[tool.setuptools.packages.find]
+include = ["tabular_ml*"]
 
 [tool.setuptools.dynamic]
 readme = {file = "README.md"}

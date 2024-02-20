@@ -2,19 +2,19 @@
 
 
 <p align="center">
-  <img src="https://github.com/developmentseed/geojson-pydantic/blob/main/imgs/repo_logo.png" alt="Logo">
+  <img src="https://github.com/xaviernogueira/geoparquet-pydantic/blob/main/imgs/repo_logo.png" alt="Logo">
 </p>
 
 </p>
 <p align="center">
-  <em> <a href="https://docs.pydantic.dev/latest/" target=A lightweight, <"_blank">`Pydantic`</a> centric library for validating GeoParquet files and converting between GeoJSON and GeoParquet...without GDAL!</em>
+  <em> A lightweight, <a href="https://docs.pydantic.dev/latest/" target=<"_blank">pydantic</a> centric library for validating GeoParquet files (or PyArrow Tables) and converting between GeoJSON and GeoParquet...without GDAL!</em>
 </p>
 <p align="center">
   <a href="https://github.com/xaviernogueira/geoparquet-pydantic/actions/workflows/pre-commit.yml" target="_blank">
-      <img src="https://github.com/developmentseed/geojson-pydantic/workflows/pre-commit/badge.svg" alt="Pre-Commit">
+      <img src="https://github.com/xaviernogueira/geoparquet-pydantic/workflows/pre-commit/badge.svg" alt="Pre-Commit">
   </a>
   <a href="https://github.com/xaviernogueira/geoparquet-pydantic/actions/workflows/tests.yml" target="_blank">
-      <img src="https://github.com/developmentseed/geojson-pydantic/workflows/tests/badge.svg" alt="Tests">
+      <img src="https://github.com/xaviernogueira/geoparquet-pydantic/workflows/tests/badge.svg" alt="Tests">
   </a>
   <a href="https://codecov.io/gh/xaviernogueira/geoparquet-pydantic" target="_blank">
       <img src="https://codecov.io/gh/xaviernogueira/geoparquet-pydantic/branch/main/graph/badge.svg" alt="Coverage">

@@ -36,4 +36,4 @@ include = ["geoparquet_pydantic*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "geoparquet_pydantic.__version__"}
-readme = {file = "README.md"}
+readme = {file = "pypi_README.md"}

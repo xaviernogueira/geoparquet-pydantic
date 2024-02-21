@@ -35,7 +35,7 @@ why must Python users install the *massive* GDAL dependency (typically via GeoPa
 * Do you need to use a wide variety of Geospatial functions? If so, you will likely have to add GDAL/GeoPandas as a dependency anyways,
 making this ibrary's conversion functions *probably* redundant.
 * Is your workflow command line centric? If so you may want to consider Planet Lab's simular CLI tool [`gpq`](https://github.com/planetlabs/gpq),
-which is written in Go and substantially faster than our CLI tool.
+which is written in Go and substantially faster.
 * Otherwise, if you are using Python and want to avoid unnecessary bulky dependencies, this library will be a great choice!
 
 **Note:** All user-exposed functions and schema classes are available at the top level (i.e., `geoparquet_pydantic.validate_geoparquet_table(...)`) of this library.

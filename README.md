@@ -1,6 +1,5 @@
 # GeoParquet-Pydantic
 
-
 <p align="center">
   <img src="https://github.com/xaviernogueira/geoparquet-pydantic/blob/main/imgs/repo_logo.png" alt="Logo">
 </p>
@@ -72,9 +71,11 @@ def validate_geoparquet_table(
     Returns:
         bool: True if the metadata is valid, False otherwise.
     """
+    ...
 ```
 
 ### Validate a Parquet file's GeoParquet metadata:
+
 ```python
 def validate_geoparquet_file(
     geoparquet_file: str | Path | pyarrow.parquet.ParquetFile,
@@ -92,7 +93,9 @@ def validate_geoparquet_file(
     Returns:
         bool: True if the metadata is valid, False otherwise.
     """
+    ...
 ```
+
 ## Conversion functions
 
 ### Convert from `geojson_pydantic.FeatureCollection` to a GeoParquet `pyarrow.Table`
@@ -123,6 +126,7 @@ def geojson_to_geoparquet(
     Returns:
         The Arrow table with GeoParquet metadata.
     """
+    ...
 ```
 
 ### Convert from a GeoParquet `pyarrow.Table` or file to a `geojson_pydantic.FeatureCollection`
@@ -143,9 +147,11 @@ def geoparquet_to_geojson(
         max_chunksize (int, optional): The maximum chunksize to read from the parquet file. Defaults to 1000.
         max_workers (int, optional): The maximum number of workers to use for parallel processing.
             Defaults to 0 (runs sequentially). Use -1 for all available cores.
+
     Returns:
         FeatureCollection: The GeoJSON Pydantic FeatureCollection.
     """
+    ...
 ```
 
 # Getting Started

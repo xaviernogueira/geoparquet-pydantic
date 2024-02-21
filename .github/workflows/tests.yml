@@ -34,7 +34,7 @@ jobs:
 
       - name: Install the library
         run: |
-          pip install .
+          pip install -e .
           pip list
 
       - name: Run tests

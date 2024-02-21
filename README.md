@@ -4,7 +4,7 @@
   <img src="https://github.com/xaviernogueira/geoparquet-pydantic/blob/main/imgs/repo_logo.png" alt="Logo">
 </p>
 <p align="center">
-  <em> A lightweight, <a href="https://docs.pydantic.dev/latest/" target=<"_blank">pydantic</a> centric library for validating GeoParquet files (or PyArrow Tables) and converting between GeoJSON and GeoParquet...without GDAL!</em>
+  <em> A lightweight, <a href="https://docs.pydantic.dev/latest/" target="_blank">pydantic</a> centric library for validating GeoParquet files (or PyArrow Tables) and converting between GeoJSON and GeoParquet...without GDAL!</em>
 </p>
 <p align="center">
   <a href="https://github.com/xaviernogueira/geoparquet-pydantic/actions/workflows/pre-commit.yml" target="_blank">

@@ -25,9 +25,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python --version
+          python3 --version
           python3 -m venv gparq
           source gparq/bin/activate
+          python3 --version
           pip install -r requirements.txt
           pip install -r dev-requirements.txt
           pip list
@@ -39,7 +40,9 @@ jobs:
           pip list
 
       - name: Run tests
-        run: pytest --cov=geoparquet_pydantic --cov-report=xml tests/
+        run: |
+          source gparq/bin/activate
+          pytest --cov=geoparquet_pydantic --cov-report=xml tests/
 
       - name: Upload coverage report to CodeCov
         uses: codecov/codecov-action@v3

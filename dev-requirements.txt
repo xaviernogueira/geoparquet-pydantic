@@ -1,3 +1,5 @@
+setuptools
+wheel
 pytest
 pytest-cov
 black

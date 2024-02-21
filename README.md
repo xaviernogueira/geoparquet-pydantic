@@ -17,10 +17,7 @@
       <img src="https://codecov.io/gh/xaviernogueira/geoparquet-pydantic/branch/main/graph/badge.svg" alt="Coverage">
   </a>
   <a href="https://pypi.org/project/geoparquet-pydantic" target="_blank">
-      <img src="https://img.shields.io/pypi/v/geoparquet-pydantic?color=%2334D058&label=pypi%20package" alt="Package version">
-  </a>
-  <a href="https://pypistats.org/packages/geoparquet-pydantic" target="_blank">
-      <img src="https://img.shields.io/pypi/dm/geoparquet-pydantic.svg" alt="Downloads">
+      <img src="https://img.shields.io/pypi/v/geoparquet-pydantic.svg" alt="Package version">
   </a>
   <a href="https://github.com/xaviernogueira/geoparquet-pydantic/blob/main/LICENSE" target="_blank">
       <img src="https://img.shields.io/github/license/xaviernogueira/geoparquet-pydantic.svg" alt="License">
